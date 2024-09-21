@@ -145,6 +145,7 @@ namespace WindowsFormsApp1
             if (!checkBox1.Checked)
             {
                 stateText.Text = "user close port,so cancel register!";
+                onenetDone = false;
                 return false;
             }
             string meterName, IMEI, IMSI, ICCID;

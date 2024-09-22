@@ -31,7 +31,7 @@ namespace WindowsFormsApp1
                 Close();
             }
             portName = portSelect.getPortName();
-            stateText.Text = "port: " + portName + " is opened";
+            stateText.Text = "port: " + portName + " was opened";
             checkBox1.Checked = true;
             checkBox1.Text = portName + " opened";
             time = new System.Windows.Forms.Timer();
@@ -242,7 +242,7 @@ namespace WindowsFormsApp1
                 {
                     serialPort.Open();
                     checkBox1.Text = portName + " opened";
-                    stateText.Text = "port: " + portName + " is opened";
+                    stateText.Text = "port: " + portName + " was opened";
                 }
             }
             else
@@ -255,7 +255,7 @@ namespace WindowsFormsApp1
                 serialPort.DiscardOutBuffer();
                 serialPort.Close();
                 checkBox1.Text = portName + " closed";
-                stateText.Text = "port: " + portName + " is closed";
+                stateText.Text = "port: " + portName + " was closed";
             }
         }
 

@@ -171,6 +171,13 @@ namespace WindowsFormsApp1
             //offline mode 
             if (Offlinemode)
             {
+                //Append register plan function
+                //web address http://10.5.7.226:8004/GIMS/checkuser.do
+                //content-type:application/x-www-form-urlencoded
+                //userno:"user name"
+                //password:"password"
+                //clientip:"ip or an empty string"
+                //processorid:"/"
                 HttpWebRequest webRequest = NBIotHttpOffline.CreateHttpWebRequestPost("http://10.5.7.226:8004/GIMS/checkuser.do");
                 if (NBIotHttpOffline.Login(webRequest))
                 {
@@ -198,6 +205,26 @@ namespace WindowsFormsApp1
                     else
                     {
                         returnMsg = httpImportResponse.msg;
+                    }
+
+                    //Append register plan function
+                    //web address http://10.5.7.226:8004/GIMS/mis/modifyDevice.do
+                    //content-type:application/x-www-form-urlencoded
+                    //operation = 1:delete =2:set plan
+                    //deviceCode:meterNumber
+                    //planId:The identifire of plan
+                    HttpWebRequest planRequest = NBIotHttpOffline.CreateHttpWebRequestPost("http://10.5.7.226:8004/GIMS/mis/modifyDevice.do");
+                    planRequest.CookieContainer = NBIotHttpOffline.cookies;
+                    NBIotHttpOffline.WriteToRequest(planRequest, new Dictionary<string,string>
+                    {
+                        { "operation" , "2" },
+                        { "deviceCode" , meterName },
+                        { "planId" , plan }
+                    });
+                    HttpResponseModifyDevice httpResponseModifyDevice =  NBIotHttp.ReadFromResponse<HttpResponseModifyDevice>(planRequest);
+                    if(httpResponseModifyDevice.status == 0)
+                    {
+                        returnMsg += $" plan is {plan}";
                     }
                 }
                 else

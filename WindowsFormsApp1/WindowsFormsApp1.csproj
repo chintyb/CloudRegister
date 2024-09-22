@@ -95,6 +95,7 @@
     <Compile Include="HttpResponse.cs" />
     <Compile Include="HttpResponseImport.cs" />
     <Compile Include="HttpResponseLogin.cs" />
+    <Compile Include="HttpResponseModifyDevice.cs" />
     <Compile Include="NBDeviceInfo.cs" />
     <Compile Include="NBIotHttp.cs" />
     <Compile Include="NBIotHttpOffline.cs" />

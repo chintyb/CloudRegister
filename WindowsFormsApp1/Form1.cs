@@ -16,6 +16,7 @@ namespace WindowsFormsApp1
         public delegate void SetStateText(string txt);
         public delegate void SendOnenetCommand();
         public delegate bool RegisterIOT(byte[] portData);
+        public delegate void EnableButton();
         public Form1()
         {
             InitializeComponent();
@@ -38,13 +39,38 @@ namespace WindowsFormsApp1
             time.Interval = 2000;
             time.Tick += Time_Tick;
             //if port was selected,then we can set options and open it!
+            Parity parity = new Parity();
+            StopBits stopBits = new StopBits();
             if (portName != null)
             {
                 try
                 {
-                    serialPort = new SerialPort(portName, 4800, Parity.Even, 8, StopBits.One);
+                    switch(portSelect.Parity)
+                    {
+                        case "no parity":
+                            parity = Parity.None; break;
+                        case "odd parity":
+                            parity = Parity.Odd; break;
+                        case "even parity":
+                            parity = Parity.Even; break;
+                        default:
+                            parity = Parity.Even; break;
+                    }
+                    switch (portSelect.StopBits)
+                    {
+                        case "0":
+                            stopBits = StopBits.None; break;
+                        case "1":
+                            stopBits = StopBits.One; break;
+                        case "1.5":
+                            stopBits = StopBits.OnePointFive; break;
+                        default:
+                            stopBits = StopBits.Two; break;
+                    }
+                    serialPort = new SerialPort(portName, Convert.ToInt32(portSelect.BardRate), parity, Convert.ToInt32(portSelect.DataBits), stopBits);
                     serialPort.DataReceived += DataReceived;
                     serialPort.Open();
+                    portState.Text = "Port: " + portName + " Baud Rate: " + portSelect.BardRate + " Parity: " + portSelect.Parity + " Databits: " + portSelect.DataBits + " Stopbits: " + portSelect.StopBits;
                 }
                 catch (Exception err)
                 {
@@ -63,13 +89,34 @@ namespace WindowsFormsApp1
 
         public void DataReceived(object sender, EventArgs e)
         {
-            SerialPort sp = (SerialPort)sender;
+            //recived usart open command,we must send onenet command to board
+            //this is a new thread,can't access form thread UI
+            //stateText.Text = "Recived port open of board command.";
+            SetStateText tem = new SetStateText(UpdateStateTxt);
+            SendOnenetCommand soc = new SendOnenetCommand(SendOnenet);
+            RegisterIOT register = new RegisterIOT(RegisterIOTPlatform);
+            EnableButton enableButton = new EnableButton(EnableStartButton);
             Thread.Sleep(500);
+            SerialPort sp = (SerialPort)sender;
             int len = sp.BytesToRead;
-            //if (len < 15) return; 
+            System.Diagnostics.Debug.WriteLine(len);
+            
+            
             byte[] byteData = new byte[len];
             sp.Read(byteData, 0, len);
-
+            ////maby 奎屯德信管道安装有限公司 only send 0x00
+            //if (len == 2) {
+            //    if (byteData[0] == 0x59 && byteData[1] == 0x00)
+            //    {
+            //        //wait 10S for system boot
+            //        BeginInvoke(tem, new object[] { "Recived port open of board command for 奎屯德信." });
+            //        Thread.Sleep(10000);
+            //        BeginInvoke(tem, new object[] { "Send onenet command after 10S" });
+            //        Thread.Sleep(1000);
+            //        SendOnenet(); 
+            //        return;
+            //    }
+            //}
             int index = 0;
             byte[] meaningfulData = new byte[0];
             for (int i = 0; i < len; i++)
@@ -86,18 +133,20 @@ namespace WindowsFormsApp1
                     Array.Copy(byteData, index, meaningfulData, 0, length);
                     break;
                 }
+                else
+                {
+                    //fix process outside access exception
+                    BeginInvoke(enableButton, null);
+                    //enableButton();
+                    return;
+                }
             }
             //UnpackData(meaningfulData);
             AnalysisDataPack analysis = new AnalysisDataPack(meaningfulData);
             if (analysis.Analysis())
             {
 
-                //recived usart open command,we must send onenet command to board
-                //this is a new thread,can't access form thread UI
-                //stateText.Text = "Recived port open of board command.";
-                SetStateText tem = new SetStateText(UpdateStateTxt);
-                SendOnenetCommand soc = new SendOnenetCommand(SendOnenet);
-                RegisterIOT register = new RegisterIOT(RegisterIOTPlatform);
+                
                 if (analysis.GetD0D1() == 0x000B)
                 {
                     //port open 5s command
@@ -122,7 +171,10 @@ namespace WindowsFormsApp1
             }
         }
 
-
+        public void EnableStartButton()
+        {
+            button1.Enabled = true;
+        }
         public void UpdateStateTxt(string txt)
         {
             this.stateText.Text = txt;
@@ -134,6 +186,7 @@ namespace WindowsFormsApp1
                 //Thread.Sleep(4000);
                 byte[] commandOnenet = new byte[] { 0x68, 0x30, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x31, 0x02, 0x27, 0x0C, 0xF7, 0x16 };
                 if (onenetDone) return;
+                serialPort.Write(new byte[] { 0xfe, 0xfe, 0xfe, 0xfe }, 0, 4);
                 serialPort.Write(commandOnenet, 0, commandOnenet.Length);
             }
         }
@@ -194,6 +247,13 @@ namespace WindowsFormsApp1
                         time.Enabled = false;
                         time.Stop();
                     }
+
+                    //discard buffer,if not may be application crash
+                    serialPort.DiscardInBuffer();
+                    //must close port ,otherwise maby continue recive bytes
+                    //during register form show
+                    serialPort.Close();
+
                     //stateText.Text = meterName + "\n" + IMEI + "\n" + IMSI + "\n" + ICCID;
                     stateText.Text = "Please check upload infomation.";
                     RegisterConfirm form = new RegisterConfirm();
@@ -207,14 +267,13 @@ namespace WindowsFormsApp1
                         stateText.Text = form.Message;
                     }
                     onenetDone = false;
-
-                    //discard buffer,if not may be application crash
-                    serialPort.DiscardInBuffer();
-                    serialPort.Close();
+                    button1.Enabled = true;
+                   
                     checkBox1.Checked = false;
                     checkBox1.Text = portName + " closed";
                 }
             }
+            
             return false;
         }
 
@@ -259,5 +318,10 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            SendOnenet();
+            button1.Enabled = false;
+        }
     }
 }

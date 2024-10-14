@@ -8,6 +8,11 @@ namespace WindowsFormsApp1
     {
         private string portName;
 
+        public string BardRate {  get; set; }
+        public string Parity { get; set; }
+        public string DataBits { get; set; }
+        public string StopBits { get; set; }
+
         public PortSelect()
         {
             InitializeComponent();
@@ -22,6 +27,10 @@ namespace WindowsFormsApp1
             else
             {
                 portName = comboxPortsList.SelectedItem.ToString();
+                BardRate = baudRate.SelectedItem.ToString();
+                Parity = parity.SelectedItem.ToString();
+                DataBits = dataBits.SelectedItem.ToString();
+                StopBits = stopBits.SelectedItem.ToString();
                 this.DialogResult = DialogResult.OK;
             }
             Close();
@@ -39,6 +48,11 @@ namespace WindowsFormsApp1
         public string getPortName()
         {
             return portName;
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

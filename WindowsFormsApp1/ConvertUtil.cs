@@ -11,6 +11,7 @@
                 str += (char)b;
             }
             string temp = str.TrimStart('0');
+            temp = temp.Trim('\0');
             //NanChang need char n
             if (temp[0] == 'n')
             {
@@ -39,7 +40,7 @@
             }
             else
             {
-                str = temp.Substring(0, 16);
+                str = temp;
             }
             return str;
         }

@@ -16,7 +16,12 @@ namespace WindowsFormsApp1
         public delegate void SetStateText(string txt);
         public delegate void SendOnenetCommand();
         public delegate bool RegisterIOT(byte[] portData);
-        public delegate void EnableButton();
+        public delegate void EnableButton(bool enable);
+
+        private SetStateText tem;
+        private SendOnenetCommand soc;
+        private RegisterIOT register;
+        private EnableButton enableButton;
         public Form1()
         {
             InitializeComponent();
@@ -24,6 +29,14 @@ namespace WindowsFormsApp1
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //recived usart open command,we must send onenet command to board
+            //this is a new thread,can't access form thread UI
+            //stateText.Text = "Recived port open of board command.";
+            tem = new SetStateText(UpdateStateTxt);
+            soc = new SendOnenetCommand(SendOnenet);
+            register = new RegisterIOT(RegisterIOTPlatform);
+            enableButton = new EnableButton(EnableStartButton);
+
             //let user select serialport
             PortSelect portSelect = new PortSelect();
             if (portSelect.ShowDialog() != DialogResult.OK)
@@ -88,37 +101,18 @@ namespace WindowsFormsApp1
         }
 
         public void DataReceived(object sender, EventArgs e)
-        {
-            //recived usart open command,we must send onenet command to board
-            //this is a new thread,can't access form thread UI
-            //stateText.Text = "Recived port open of board command.";
-            SetStateText tem = new SetStateText(UpdateStateTxt);
-            SendOnenetCommand soc = new SendOnenetCommand(SendOnenet);
-            RegisterIOT register = new RegisterIOT(RegisterIOTPlatform);
-            EnableButton enableButton = new EnableButton(EnableStartButton);
+        {         
             Thread.Sleep(500);
             SerialPort sp = (SerialPort)sender;
+            if (!sp.IsOpen) return;
             int len = sp.BytesToRead;
             System.Diagnostics.Debug.WriteLine(len);
             
             
             byte[] byteData = new byte[len];
             sp.Read(byteData, 0, len);
-            ////maby 奎屯德信管道安装有限公司 only send 0x00
-            //if (len == 2) {
-            //    if (byteData[0] == 0x59 && byteData[1] == 0x00)
-            //    {
-            //        //wait 10S for system boot
-            //        BeginInvoke(tem, new object[] { "Recived port open of board command for 奎屯德信." });
-            //        Thread.Sleep(10000);
-            //        BeginInvoke(tem, new object[] { "Send onenet command after 10S" });
-            //        Thread.Sleep(1000);
-            //        SendOnenet(); 
-            //        return;
-            //    }
-            //}
             int index = 0;
-            byte[] meaningfulData = new byte[0];
+            byte[] meaningfulData = null;
             for (int i = 0; i < len; i++)
             {
                 //if (len - i < 15) break;
@@ -133,14 +127,13 @@ namespace WindowsFormsApp1
                     Array.Copy(byteData, index, meaningfulData, 0, length);
                     break;
                 }
-                else
-                {
-                    //fix process outside access exception
-                    BeginInvoke(enableButton, null);
-                    //enableButton();
-                    return;
-                }
             }
+            //there isn't have any data frames,
+            if (meaningfulData == null) 
+            {
+                BeginInvoke(enableButton, new object[] { true });
+                return;
+            };
             //UnpackData(meaningfulData);
             AnalysisDataPack analysis = new AnalysisDataPack(meaningfulData);
             if (analysis.Analysis())
@@ -157,6 +150,8 @@ namespace WindowsFormsApp1
                     //write onenet command
                     //serialPort.Write(commandOnenet, 0, commandOnenet.Length);
                     //Invoke(soc);
+                    //disable start button after sendonenet
+                    BeginInvoke(enableButton, new object[] { false });
                     SendOnenet();
                 }
                 else if (analysis.GetD0D1() == 0x270C && analysis.ControlNumber[0] == 0xB1)
@@ -171,9 +166,9 @@ namespace WindowsFormsApp1
             }
         }
 
-        public void EnableStartButton()
+        public void EnableStartButton(bool enable)
         {
-            button1.Enabled = true;
+            button1.Enabled = enable;
         }
         public void UpdateStateTxt(string txt)
         {
@@ -302,6 +297,8 @@ namespace WindowsFormsApp1
                     serialPort.Open();
                     checkBox1.Text = portName + " opened";
                     stateText.Text = "port: " + portName + " was opened";
+                    //enable start button
+                    button1.Enabled = true ;
                 }
             }
             else

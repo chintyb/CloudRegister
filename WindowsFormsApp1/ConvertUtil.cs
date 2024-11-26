@@ -12,6 +12,7 @@
             }
             string temp = str.TrimStart('0');
             temp = temp.Trim('\0');
+            if(temp.Length == 0)    return string.Empty;
             //NanChang need char n
             if (temp[0] == 'n')
             {

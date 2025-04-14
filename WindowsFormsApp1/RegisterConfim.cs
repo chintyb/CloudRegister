@@ -52,6 +52,7 @@ namespace WindowsFormsApp1
                 dicProtocal.Add("80", "阀门井HW");
                 dicProtocal.Add("81", "井盖HW");
                 dicProtocal.Add("82", "家用报警器HW");
+                dicProtocal.Add("121", "NB青岛泰能协议");
             }
             foreach (string s in dicProtocal.Values)
             {

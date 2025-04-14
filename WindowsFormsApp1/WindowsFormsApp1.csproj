@@ -65,7 +65,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>E902B959791A0E17CF15D2EC62DB74E43BF965F6</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>64683DC23F267710C4CAC596CBF4482037CC9978</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestKeyFile>WindowsFormsApp1_TemporaryKey.pfx</ManifestKeyFile>

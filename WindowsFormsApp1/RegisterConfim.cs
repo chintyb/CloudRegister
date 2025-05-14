@@ -49,6 +49,7 @@ namespace WindowsFormsApp1
                 dicProtocal.Add("71", "NB河南平顶山");
                 dicProtocal.Add("72", "NB中久协议");
                 dicProtocal.Add("73", "NB柯桥燃气协议");
+                dicProtocal.Add("74", "NB宁波奉化协议");
                 dicProtocal.Add("80", "阀门井HW");
                 dicProtocal.Add("81", "井盖HW");
                 dicProtocal.Add("82", "家用报警器HW");

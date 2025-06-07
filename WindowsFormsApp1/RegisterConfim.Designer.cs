@@ -49,8 +49,8 @@
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.label8 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.Offline = new System.Windows.Forms.RadioButton();
             this.Online = new System.Windows.Forms.RadioButton();
+            this.Offline = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.registerConfirmBindingSource)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -195,6 +195,7 @@
             this.comboBox3.Location = new System.Drawing.Point(94, 245);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(382, 24);
+            this.comboBox3.Sorted = true;
             this.comboBox3.TabIndex = 16;
             this.comboBox3.SelectionChangeCommitted += new System.EventHandler(this.comboBox3_SelectionChangeCommitted);
             // 
@@ -218,6 +219,17 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Mode select";
             // 
+            // Online
+            // 
+            this.Online.AutoSize = true;
+            this.Online.Location = new System.Drawing.Point(175, 14);
+            this.Online.Name = "Online";
+            this.Online.Size = new System.Drawing.Size(59, 16);
+            this.Online.TabIndex = 0;
+            this.Online.Text = "Online";
+            this.Online.UseVisualStyleBackColor = true;
+            this.Online.CheckedChanged += new System.EventHandler(this.Online_CheckedChanged);
+            // 
             // Offline
             // 
             this.Offline.AutoSize = true;
@@ -230,17 +242,6 @@
             this.Offline.Text = "Offline";
             this.Offline.UseVisualStyleBackColor = true;
             this.Offline.CheckedChanged += new System.EventHandler(this.Offline_CheckedChanged);
-            // 
-            // Online
-            // 
-            this.Online.AutoSize = true;
-            this.Online.Location = new System.Drawing.Point(175, 14);
-            this.Online.Name = "Online";
-            this.Online.Size = new System.Drawing.Size(59, 16);
-            this.Online.TabIndex = 0;
-            this.Online.Text = "Online";
-            this.Online.UseVisualStyleBackColor = true;
-            this.Online.CheckedChanged += new System.EventHandler(this.Online_CheckedChanged);
             // 
             // RegisterConfirm
             // 
